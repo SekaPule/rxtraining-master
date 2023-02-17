@@ -1,6 +1,8 @@
 package ru.artkorchagin.rxtraining.rx;
 
+import android.os.Build;
 import android.support.annotation.MainThread;
+import android.support.annotation.RequiresApi;
 
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
@@ -26,13 +28,7 @@ public class RxMaybeTraining {
      * либо не эммитит ничего, если {@code value} отрицательное
      */
     Maybe<Integer> positiveOrEmpty(Integer value) {
-        return Maybe.create(emitter -> {
-            if (value >= 0) {
-                emitter.onSuccess(value);
-            } else {
-                emitter.onComplete();
-            }
-        });
+        return Maybe.just(value).filter(it -> it >= 0);
     }
 
     /**
@@ -43,13 +39,7 @@ public class RxMaybeTraining {
      * положительное число, иначе не эммитит ничего
      */
     Maybe<Integer> positiveOrEmpty(Single<Integer> valueSingle) {
-        return Maybe.create(emitter -> {
-            if (valueSingle.blockingGet() >= 0) {
-                emitter.onSuccess(valueSingle.blockingGet());
-            } else {
-                emitter.onComplete();
-            }
-        });
+        return Maybe.just(valueSingle.blockingGet()).filter(it -> it >= 0);
     }
 
     /**
@@ -59,11 +49,9 @@ public class RxMaybeTraining {
      * @return {@link Maybe} который эммитит сумму всех элементов, либо не эммитит ничего если
      * последовательность пустая
      */
+    @RequiresApi(api = Build.VERSION_CODES.N)
     Maybe<Integer> calculateSumOfValues(Observable<Integer> integerObservable) {
-        return integerObservable.reduce((acc, value) -> {
-            acc += value;
-            return acc;
-        });
+        return integerObservable.reduce(Integer::sum);
     }
 
     /**
@@ -74,7 +62,7 @@ public class RxMaybeTraining {
      * {@code defaultValue} если последовательность пустая
      */
     Single<Integer> leastOneElement(Maybe<Integer> integerMaybe, int defaultValue) {
-        return Single.create(emitter -> emitter.onSuccess(integerMaybe.blockingGet(defaultValue)));
+        return integerMaybe.toSingle(defaultValue);
     }
 
 }
