@@ -2,10 +2,8 @@ package ru.artkorchagin.rxtraining.rx;
 
 import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Emitter;
 import io.reactivex.Observable;
 import ru.artkorchagin.rxtraining.exceptions.ExpectedException;
-import ru.artkorchagin.rxtraining.exceptions.NotImplementedException;
 
 /**
  * @author Arthur Korchagin (artur.korchagin@simbirsoft.com)
@@ -23,10 +21,7 @@ public class RxCreatingTraining {
      * @return {@link Observable}, который эммитит только значение {@code value}
      */
     public Observable<Integer> valueToObservable(int value) {
-        return Observable.create(emitter -> {
-            emitter.onNext(value);
-            emitter.onComplete();
-        });
+        return Observable.just(value);
     }
 
     /**
@@ -36,12 +31,7 @@ public class RxCreatingTraining {
      * @return {@link Observable}, который эммитит по порядку все строки из заданного массива
      */
     public Observable<String> arrayToObservable(String[] array) {
-        return Observable.create(emitter -> {
-            for (String string: array) {
-                emitter.onNext(string);
-            }
-            emitter.onComplete();
-        });
+        return Observable.fromArray(array);
     }
 
     /**
@@ -52,10 +42,7 @@ public class RxCreatingTraining {
      * {@link #expensiveMethod()}
      */
     public Observable<Integer> expensiveMethodResult() {
-        return Observable.create(emitter -> {
-            emitter.onNext(expensiveMethod());
-            emitter.onComplete();
-        });
+        return Observable.fromCallable(this::expensiveMethod);
     }
 
     /**
@@ -94,14 +81,10 @@ public class RxCreatingTraining {
      * 3. {@link #unstableMethod(boolean)}
      */
     public Observable<Integer> combinationExpensiveMethods(final boolean unstableCondition) {
-        return Observable.create(
-                emitter -> {
-                    emitter.onNext(expensiveMethod());
-                    emitter.onNext(alternativeExpensiveMethod());
-                    emitter.onNext(unstableMethod(unstableCondition));
-                    emitter.onComplete();
-                }
-        );
+        return Observable.concat(
+                Observable.fromCallable(this::expensiveMethod),
+                Observable.fromCallable(this::alternativeExpensiveMethod),
+                Observable.fromCallable(() -> unstableMethod(unstableCondition)));
     }
 
     /**
@@ -120,7 +103,7 @@ public class RxCreatingTraining {
      * @return {@link Observable} который не эммитит значения, вызывается только {@code onComplete}
      */
     public Observable<Integer> onlyComplete() {
-        return Observable.create(Emitter::onComplete);
+        return Observable.empty();
     }
 
     /**
