@@ -1,5 +1,8 @@
 package ru.artkorchagin.rxtraining.rx;
 
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -50,11 +53,9 @@ public class RxSingleTraining {
      * @return {@link Single} который эммитит сумму всех элементов, либо 0 если последовательность
      * пустая
      */
+    @RequiresApi(api = Build.VERSION_CODES.N)
     Single<Integer> calculateSumOfValues(Observable<Integer> integerObservable) {
-        return integerObservable.reduce((acc, value) -> {
-            acc += value;
-            return acc;
-        }).toSingle();
+        return integerObservable.reduce(0, Integer::sum);
     }
 
     /**
