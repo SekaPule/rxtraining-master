@@ -33,11 +33,11 @@ public class RxCompletableTraining {
      * @return {@code Completable}
      */
     Completable completeWhenTrue(Single<Boolean> checkSingle) {
-        return Completable.create(emitter -> {
-            if (!Boolean.TRUE.equals(checkSingle.blockingGet())) {
-                emitter.onError(new ExpectedException());
+        return checkSingle.flatMapCompletable(aBoolean -> {
+            if (Boolean.TRUE.equals(aBoolean)) {
+                return Completable.complete();
             } else {
-                emitter.onComplete();
+                return Completable.error(new ExpectedException());
             }
         });
     }
